@@ -99,7 +99,7 @@ ${jsonencode({
     },
     {
       path        = "/etc/cron.d/shutdown_cron"
-      content     = "0 22 * * * /sbin/shutdown -h +10 'You development machine will shut down in 10 minutes. Save your work and go to sleep! Run \"shutdown -c\" to cancel.'"
+      content     = "0 22 * * * /sbin/shutdown -h +10 'You development machine will shut down in 10 minutes. Save your work and go to sleep! Run \"shutdown -c\" to cancel.'\n"
       owner       = "root:root"
       permissions = "0644"
     }

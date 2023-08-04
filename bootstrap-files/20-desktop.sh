@@ -5,6 +5,8 @@ DEBIAN_FRONTEND=noninteractive
 sudo apt-get install -yqq -o Dpkg::Use-Pty="0" ubuntu-desktop-minimal > /dev/null
 # No need for a dektop manager
 sudo systemctl disable gdm > /dev/null
+# Oddly needed for ubuntu dock to function
+gnome-extensions enable ubuntu-dock@ubuntu.com
 
 # Configure VNC
 sudo apt-get install -yqq -o Dpkg::Use-Pty="0" tigervnc-standalone-server tigervnc-xorg-extension > /dev/null

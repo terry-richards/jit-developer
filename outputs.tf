@@ -17,7 +17,7 @@ Cloud-init v. 23.2.1-0ubuntu0~22.04.1 finished at Fri, 04 Aug 2023 01:53:17 +000
 Up 11.24 seconds
 
 You can now connect via VNC:
-$ ssh -L 5901:localhost:5901 -f -i ${var.output_dir}/${local.developer_user_name}-key-pair.pem ubuntu@${aws_instance.developer.public_dns} 'vncserver --SecurityTypes None > /dev/null && sleep 30'; sleep 5 && vncviewer SecurityTypes None localhost:5901 &> /dev/null
+$ ssh -L 5901:localhost:5901 -f -i ${var.output_dir}/${local.developer_user_name}-key-pair.pem ubuntu@${aws_instance.developer.public_dns} 'vncserver --SecurityTypes None > /dev/null && sleep 30'; sleep 5 && vncviewer -FullScreen -FullScreenMode=All -SecurityTypes=None localhost:5901 &> /dev/null &
 
 This will start a VNC server on the instance and connect you to it. This assumes you have a vncviewer installed on 
 your local machine. If you do not, you can install one with:
