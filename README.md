@@ -2,9 +2,13 @@
 
 One area of dissonance in today's increasingly distributed organization relates to the elevated security requirements typically associated with a developer's machine. The rapidly depreciating cost of these assets tug on ROI while the security footprint potentially opens up additional vectors for compromise.
 
-With productivity suites now PWAs, the era of BYOD or even providing simple Chromebooks is upon us and we believe this is a great step forward organizationally and for IT. 
+With productivity suites now progressive web apps (PWAs), the era of bring-your-own-device (BYOD) or even providing simple Chromebooks is upon us and we believe this is a great step forward organizationally and for IT. 
 
-For the developer, the ability to spin up a fully-functional development environment at a moment's notice is an invaluable asset. This environment can be scaled to the needs of the specific project and recycled when no longer required. This tutorial will walk you through the process of creating a just-in-time (JIT) developer environment in AWS using EC2 and the latest LTS version of Ubuntu Server. We'll leverage the power of Terraform to automate the whole process.
+As a developer in this new landscape, the ability to spin up a fully-functional development environment at a moment's notice is an invaluable asset. This environment can be scaled to the needs of the specific project and recycled when no longer required. 
+
+For the administrator, having the tools to orchestrate the lifecycle of these resources in a secure environment that you can limit footprint, easily audit and fully control is also invaluable.
+
+This tutorial will walk you through the process of creating a just-in-time (JIT) developer environment in AWS using EC2 and the latest LTS version of Ubuntu Server. We'll leverage the power of Terraform to automate the whole process.
 
 ## Why Terraform and JIT?
 
@@ -33,11 +37,8 @@ aws iam create-group --group-name terraform
 
 # Attach necessary permissions to the "terraform" group
 aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess --group-name terraform
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonRoute53FullAccess --group-name terraform
 aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess --group-name terraform
 aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonVPCFullAccess --group-name terraform
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonSQSFullAccess --group-name terraform
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEventBridgeFullAccess --group-name terraform
 aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess  --group-name terraform
 
 # Create a user named "terraform" and add it to the "terraform" group
@@ -47,8 +48,6 @@ aws iam add-user-to-group --user-name terraform --group-name terraform
 # Create an access key for the "terraform" user
 aws iam create-access-key --user-name terraform
 ```
-
-These permissions should allow for additional capabilities to enhance the code in areas like notifications and DNS mapping.
 
 This will return an Access Key ID and a Secret Access Key. To add these to your local AWS profiles, use the AWS CLI command `aws configure --profile terraform` and enter the returned values.
 
@@ -101,7 +100,7 @@ $ terraform apply
 
 With our vpc and subnet in place, we'll update the `setenv` file with their IDs. Source the `setenv` file again to update the environment variables.  This is a good time to review the other variables and set as appropriate. 
 
-![step4.png](https://github.com/terry-richards/jit-developer/assets/141377286/f7c96a9e-40e5-47c4-b8c4-63dcf2046d05 "Update your configuration")
+![step4.png](https://github.com/terry-richards/jit-developer/assets/141377286/474ec069-d2f3-4f83-9ef1-ed4293ce0ed1 "Update your configuration")
 
 **Step 5: Run the main Terraform file**
 
@@ -128,6 +127,10 @@ Our bootstrapping process is split into three areas for readability: os-level, d
 The scripts are part of our Terraform code and can be found in the `bootstrap-files` [directory of our GitHub repository](https://github.com/terry-richards/jit-developer/tree/main/bootstrap-files).
 
 Our Terraform setup also creates a shutdown cron job that stops the instance nightly at 10:00 PM. This helps in managing costs by ensuring the instance is stopped when not in use.  This can be overridden by the developer if logged in but should be used as a guide to seek balance. 😉
+
+Once the bootstrapping process has completed and the system reboots, you will be presented with a ready-to-use development environment:
+
+![desktop.png](https://github.com/terry-richards/jit-developer/assets/141377286/79cbe503-6788-4f38-9351-43d28ee8e778 "Ubuntu 22.04 minimal desktop with developer tools installed.")
 
 ## Enhancements
 
