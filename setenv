@@ -1,0 +1,15 @@
+export ORG=tmrsd
+export AWS_PROFILE=terraform
+export AWS_REGION=us-east-2
+export TF_STATE_PREFIX=${ORG}-terraform-state
+export TF_STATE_STORE=s3://${TF_STATE_PREFIX}
+
+# set the terraform variables
+export TF_VAR_namespace=$ORG
+export TF_VAR_project=jit-developer
+export TF_VAR_aws_region=$AWS_REGION
+export TF_VAR_developer_email=terry@tmrsd.com
+export TF_VAR_developer_name="Terry Richards"
+export TF_VAR_developer_timezone="America/Chicago"
+export TF_VAR_development_vpc_id="vpc-003b276d19b960d85"
+export TF_VAR_development_subnet_id="subnet-0e3e160a952e844d9"
