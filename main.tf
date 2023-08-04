@@ -34,7 +34,7 @@ resource "aws_instance" "developer" {
   }
 
   tags = {
-    Name = "${local.developer_user_name}-developer"
+    Name = local.developer_machine_name
   }
 }
 
@@ -71,7 +71,7 @@ ${jsonencode({
       path     = "/home/ubuntu/bootstrap-files/10-os-level.sh"
       encoding = "b64"
       content = base64encode(templatefile("./bootstrap-files/10-os-level.sh", {
-        instance_name = "${local.developer_user_name}-developer"
+        instance_name      = local.developer_machine_name
         developer_timezone = var.developer_timezone
       }))
       owner       = "ubuntu:ubuntu"

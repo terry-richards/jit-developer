@@ -1,39 +1,38 @@
 #!/bin/bash -e
 export DEBIAN_FRONTEND=noninteractive
 
-# Install the JDK
+# JDK
 sudo apt-get install -yqq -o Dpkg::Use-Pty="0" openjdk-17-jdk > /dev/null
 java --version
 
-# Install Helm
+# Helm
 sudo snap install helm --classic
 
-# Install Terraform
+# Terraform
 sudo snap install terraform --classic
 terraform -version
 
-#Install aws cli
+# AWS cli
 curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip -qq awscliv2.zip
 sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli > /dev/null
 aws --version
 
-# Install Chrome
+# Chrome
 mkdir ~/Downloads
 cd ~/Downloads
 wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo dpkg -i google-chrome-stable_current_amd64.deb > /dev/null
 
-# Install IntelliJ & Code
-mkdir ~/bin
-mkdir ~/opt
-mkdir ~/src
+# IntelliJ
 sudo snap install intellij-idea-ultimate --classic
 intellij-idea-ultimate --version
+
+# Code
 sudo snap install --classic code
 code --v
 
-# Install and configure microk8s 
+# and configure microk8s with a sensible set of addons
 sudo snap install microk8s --classic
 sudo usermod -a -G microk8s ubuntu
 sudo microk8s.status --wait-ready
@@ -48,11 +47,11 @@ sudo microk8s.config > ~/.kube/config
 chmod 400 ~/.kube/config
 sudo microk8s.kubectl completion bash | sudo tee -a /etc/bash_completion.d/kubectl > /dev/null
 
-# Install podman
+# podman
 sudo apt-get install -yqq -o Dpkg::Use-Pty="0" podman > /dev/null
 podman --version
 
-# Install maven
+# maven
 sudo apt-get install -yqq -o Dpkg::Use-Pty="0" maven > /dev/null
 mvn --version
 

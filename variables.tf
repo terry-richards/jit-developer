@@ -48,7 +48,7 @@ variable "development_vpc_id" {
 variable "output_dir" {
   type        = string
   description = "directory where the private key will be saved"
-  default = "./out"
+  default     = "./out"
 }
 
 variable "root_volume_size" {
@@ -59,5 +59,6 @@ variable "root_volume_size" {
 
 # Derived locals
 locals {
-  developer_user_name = split("@", var.developer_email)[0]
+  developer_user_name    = split("@", var.developer_email)[0]
+  developer_machine_name = "${var.project}-${local.developer_user_name}"
 }

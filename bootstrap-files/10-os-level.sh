@@ -29,6 +29,10 @@ sudo sed -i 's#//Unattended-Upgrade::Automatic-Reboot-Time "02:00"#Unattended-Up
 
 sudo systemctl enable unattended-upgrades > /dev/null
 sudo systemctl start unattended-upgrades > /dev/null
+
 # Set up endless history
 sed -i 's#HISTSIZE=1000#HISTSIZE=#' ~/.bashrc
 sed -i 's#HISTFILESIZE=2000#HISTFILESIZE=#' ~/.bashrc
+
+# My conventions - did you know that bin is sourced into PATH by default?
+mkdir ~/bin ~/opt ~/src

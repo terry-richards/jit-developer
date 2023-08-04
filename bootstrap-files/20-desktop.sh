@@ -8,7 +8,7 @@ sudo systemctl disable gdm > /dev/null
 # Oddly needed for ubuntu dock to function
 gnome-extensions enable ubuntu-dock@ubuntu.com
 
-# Configure VNC
+# Configure VNC and set password
 sudo apt-get install -yqq -o Dpkg::Use-Pty="0" tigervnc-standalone-server tigervnc-xorg-extension > /dev/null
 mkdir /home/ubuntu/.vnc
 echo `date +%s | sha256sum | base64 | head -c 8 ; echo` | vncpasswd -f > /home/ubuntu/.vnc/passwd
