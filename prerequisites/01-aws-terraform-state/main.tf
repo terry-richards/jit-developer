@@ -1,31 +1,47 @@
-module "s3_bucket" {
-  source  = "cloudposse/s3-bucket/aws"
-  version = "3.1.2"
+resource "aws_s3_bucket" "state" {
+  bucket = "tmrsd-terraform-state"
+}
 
-  namespace               = var.namespace
-  name                    = "terraform-state"
-  acl                     = "private"
+resource "aws_s3_bucket_acl" "acl" {
+  bucket = aws_s3_bucket.state.id
+  acl    = "private"
+  depends_on = [aws_s3_bucket_ownership_controls.s3_bucket_acl_ownership]
+}
+
+resource "aws_s3_bucket_versioning" "versioning" {
+  bucket = aws_s3_bucket.state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+resource "aws_s3_bucket_public_access_block" "access_block" {
+  bucket = aws_s3_bucket.state.id
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-
-  versioning_enabled = true
-
 }
 
 module "dynamodb_table" {
-  source    = "cloudposse/dynamodb/aws"
-  version   = "0.33.0"
-  namespace = var.namespace
-  name      = "terraform-lock"
-  hash_key  = "LockID"
+  source   = "terraform-aws-modules/dynamodb-table/aws"
+  version  = "3.3.0"
+  name     = "tmrsd-terraform-lock"
+  hash_key = "LockID"
 
-  dynamodb_attributes = [
+  attributes = [
     {
       name = "LockID"
       type = "S"
     }
   ]
 
+}
+
+# [Resource to avoid error](https://stackoverflow.com/a/76115428) "AccessControlListNotSupported: The bucket does not allow ACLs"
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_acl_ownership" {
+  bucket = aws_s3_bucket.state.id
+  rule {
+    object_ownership = "ObjectWriter"
+  }
 }
