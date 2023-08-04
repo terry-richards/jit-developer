@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "state" {
   bucket = "tmrsd-terraform-state"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_acl" "acl" {

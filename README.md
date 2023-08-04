@@ -63,7 +63,7 @@ Start by [cloning the repository](https://github.com/terry-richards/jit-develope
 
 First, we'll set up our environment using the `setenv` file, which contains all the necessary environment variables. Source the file using:
 ```bash
-$ source setenv
+source setenv
 ```
 
 These values must be sourced prior to running any terraform command.
@@ -78,8 +78,8 @@ Use the files in `prerequisites/01-aws-terraform-state` to create the state buck
 
 You can run these files by navigating to that directory and executing:
 ```bash
-$ source ../../setenv && terraform init
-$ terraform apply
+source ../../setenv && terraform init
+terraform apply
 ```
 
 ![step2.png](https://github.com/terry-richards/jit-developer/assets/141377286/57f396b6-1ab1-4b8e-80da-7cc15a5bcece "S3 bucket and DynamoDB table successfully created.")
@@ -90,8 +90,8 @@ Next, we'll create a VPC and subnet for our developer environment. This is an ex
 
 As before, navigate to the directory and execute:
 ```bash
-$ source ../../setenv && terraform init
-$ terraform apply
+source ../../setenv && terraform init
+terraform apply
 ```
 
 ![step3.png](https://github.com/terry-richards/jit-developer/assets/141377286/9c5fec99-68a5-4d14-a357-322644a836e2 "VPC and subnet creation")
@@ -108,8 +108,8 @@ Finally, it's time to bring everything together. We can now run our main Terrafo
 
 Navigate to the root directory of the project and execute:
 ```bash
-$ source setenv && terraform init
-$ terraform apply
+source setenv && terraform init
+terraform apply
 ```
 
 ![step5.png](https://github.com/terry-richards/jit-developer/assets/141377286/b25fb3b7-b557-46e9-818d-5d9c2b307e91 "EC2 instance created!")
@@ -131,6 +131,17 @@ Our Terraform setup also creates a shutdown cron job that stops the instance nig
 Once the bootstrapping process has completed and the system reboots, you will be presented with a ready-to-use development environment:
 
 ![desktop.png](https://github.com/terry-richards/jit-developer/assets/141377286/79cbe503-6788-4f38-9351-43d28ee8e778 "Ubuntu 22.04 minimal desktop with developer tools installed.")
+
+## Cleanup
+
+Run the following to clean up all resources created in this tutorial:
+
+```bash
+source setenv && terraform destroy --auto-approve \
+  && cd prerequisites/02-developer-vpc/ && terraform destroy --auto-approve \
+  && cd ../../prerequisites/01-aws-terraform-state/ && terraform destroy --auto-approve \
+  && cd ../..
+```
 
 ## Enhancements
 
