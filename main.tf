@@ -40,7 +40,7 @@ resource "aws_instance" "developer" {
 
 resource "aws_security_group" "sg" {
   name        = "${local.developer_user_name}-sg"
-  description = "Security group for ${var.namespace}-${var.project}"
+  description = "Security group for ${local.developer_machine_name}"
 
   vpc_id = var.development_vpc_id
 
