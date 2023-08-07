@@ -1,4 +1,4 @@
-# Creating a Just-in-Time Developer Environment in AWS with Terraform and Ubuntu
+# A Greater Codespace with JIT Ubuntu and Terraform
 
 ![ubuntu-desktop](https://github.com/terry-richards/jit-developer/assets/141377286/66715d74-1669-404b-998b-7c71881927fb "A JIT developer environment — ready to rumble")
 
@@ -146,7 +146,7 @@ Once the bootstrapping process has completed and the system reboots, you will be
 
 ## Cleanup
 
-Run the following to clean up all resources created in this tutorial:
+Run the following to clean up all terraform-managed resources created in this tutorial:
 
 ```bash
 source setenv && terraform destroy --auto-approve \
@@ -155,7 +155,7 @@ source setenv && terraform destroy --auto-approve \
   && cd ../..
 ```
 
-And then finishing by logging into the [AWS CloudShell](https://aws.amazon.com/cloudshell/) and executing this one-liner:
+And then finish by logging into the [AWS CloudShell](https://aws.amazon.com/cloudshell/) and executing this one-liner:
 
 ```bash
 USER_TO_DELETE='terraform' && \
@@ -181,8 +181,8 @@ While this setup offers a lot of benefits, there's always room for improvement. 
 
 ## Conclusion
 
-Hopefully, this article has provided some architectural inspiration and practical steps to create a just-in-time developer environment in AWS using Terraform and Ubuntu Server. 
+Hopefully, this article has provided some architectural inspiration and practical steps to create a just-in-time developer environment in AWS using Terraform and Ubuntu Server.
 
-Stay tuned for an upcoming article where we may tackle some of the enhancements discussed above. Until then, happy coding!
+Be sure to subscribe for upcoming articles where we will tackle some of the enhancements discussed above and more generally, delve into the rapidly evolving enterprise architecture landscape. Until then, happy coding!
 
 You can find the complete code and detailed explanation on our [GitHub repository](https://github.com/terry-richards/jit-developer).
