@@ -1,13 +1,21 @@
+# At minimum, you must set this so that the S3 bucket is unique
+export ORG=tmrsd
+
 export AWS_PROFILE=terraform
 export AWS_REGION=us-east-2
 
-# set the terraform variables
-export TF_VAR_namespace=tmrsd
+# Terraform variables (note the TF_VAR convention)
+export TF_VAR_namespace=$ORG
+export TF_VAR_terraform_state_bucket_prefix=${ORG}-terraform-state
+export TF_VAR_terraform_state_bucket=s3://${TF_VAR_terraform_state_bucket_prefix}
+export TF_VAR_terraform_state_lock_table=${TF_VAR_terraform_state_bucket_prefix}-lock
 export TF_VAR_project=jit-developer
 export TF_VAR_aws_region=$AWS_REGION
 export TF_VAR_instance_type=m6a.xlarge
 export TF_VAR_developer_email=terry@tmrsd.com
 export TF_VAR_developer_name="Terry Richards"
 export TF_VAR_developer_timezone="America/Chicago"
-export TF_VAR_development_vpc_id="vpc-02013ce6769e71d02"
-export TF_VAR_development_subnet_id="subnet-0a86b6415cb4853a5"
+
+# Set these to values returned from step 2
+export TF_VAR_development_vpc_id="vpc-0447e371bd247d84e"
+export TF_VAR_development_subnet_id="subnet-0a1de0547fa6968a9"

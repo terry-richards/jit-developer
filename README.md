@@ -1,14 +1,20 @@
 # Creating a Just-in-Time Developer Environment in AWS with Terraform and Ubuntu
 
-One area of dissonance in today's increasingly distributed organization relates to the elevated security requirements typically associated with a developer's machine. The rapidly depreciating cost of these assets tug on ROI while the security footprint potentially opens up additional vectors for compromise.
+![ubuntu-desktop](https://github.com/terry-richards/jit-developer/assets/141377286/66715d74-1669-404b-998b-7c71881927fb "A JIT developer environment — ready to rumble")
 
-With productivity suites now progressive web apps (PWAs), the era of bring-your-own-device (BYOD) or even providing simple Chromebooks is upon us and we believe this is a great step forward organizationally and for IT. 
+One area of dissonance in today’s increasingly distributed organization relates to the elevated security requirements typically associated with a developer’s machine. The rapidly depreciating cost of these assets tug on ROI while the typical configured security footprint opens up additional vectors for compromise.
 
-As a developer in this new landscape, the ability to spin up a fully-functional development environment at a moment's notice is an invaluable asset. This environment can be scaled to the needs of the specific project and recycled when no longer required. 
+With productivity suites now progressive web apps (PWAs) and most if not all required day-to-day activities available from a simple browser, the era of bring-your-own-device (BYOD) or even providing simple Chromebooks appears upon us. We believe this is a great step forward organizationally and for IT.
 
-For the administrator, having the tools to orchestrate the lifecycle of these resources in a secure environment that you can limit footprint, easily audit and fully control is also invaluable.
+As this transition ferments, developers are presented with a rapidly evolving landscape of streaming development platforms like Github Codespaces and Amazon Cloud9. Like many infrastructure as service (IaS) solutions, there is an obvious tradeoff between cost and convenience.  As well, we find these solutions limiting in ability to simulate a fully functional development environment. 
 
-This tutorial will walk you through the process of creating a just-in-time (JIT) developer environment in AWS using EC2 and the latest LTS version of Ubuntu Server. We'll leverage the power of Terraform to automate the whole process.
+The approach outlined here creates a just-in-time (JIT) developer environment in AWS using EC2 and the latest LTS version of Ubuntu Linux Server. We’ll leverage the power of Terraform to automate the whole process. 
+
+As a developer, the ability to spin up a fully-functional development environment at a moment’s notice is an invaluable asset. This environment can be scaled to the needs of the specific project and recycled when no longer required.
+
+For the administrator, having the tools to orchestrate the life-cycle of these resources in a secure environment that you can limit footprint, easily audit and fully control is also invaluable.
+
+All code developed for this article can be found in the [companion repository](https://github.com/terry-richards/jit-developer).
 
 ## Why Terraform and JIT?
 
@@ -18,7 +24,7 @@ The JIT approach, on the other hand, reduces cost and increases productivity by 
 
 ## Prerequisites
 
-This article was prepared on an Ubuntu machine using a bash terminal. You will need to adjust for your OS of choice.   
+This article was prepared on an Ubuntu Linux machine using a bash terminal. You will need to adjust for your OS of choice.   
 
 Before we begin, you'll need to have the following:
 
@@ -27,31 +33,31 @@ Before we begin, you'll need to have the following:
 - Terraform [installed](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your machine
 - A VNC client (we recommend [TigerVNC](https://tigervnc.org/))
 
-Performing these actions as the root AWS user carries security risks. Hence, it is recommended to create a specific AWS profile. In this tutorial, we'll use a profile named "terraform". 
+Performing these actions as the root AWS user carries unreasonable security risks. Hence, it is always recommended to create a specific AWS profile. In this tutorial, we'll use a profile named "terraform". 
 
-You can create this profile by logging into the AWS CloudShell and executing the commands shown below:
+You can create this profile by logging into the [AWS CloudShell](https://aws.amazon.com/cloudshell/) and executing this convenient one-liner:
 
 ```bash
-# Create a new group called "terraform"
-aws iam create-group --group-name terraform
-
-# Attach necessary permissions to the "terraform" group
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess --group-name terraform
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess --group-name terraform
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonVPCFullAccess --group-name terraform
-aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess  --group-name terraform
-
-# Create a user named "terraform" and add it to the "terraform" group
-aws iam create-user --user-name terraform
-aws iam add-user-to-group --user-name terraform --group-name terraform
-
-# Create an access key for the "terraform" user
-aws iam create-access-key --user-name terraform
+USER_TO_CREATE='terraform' && \
+aws iam create-group --group-name $USER_TO_CREATE && \
+aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess --group-name $USER_TO_CREATE && \
+aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess --group-name $USER_TO_CREATE && \
+aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonVPCFullAccess --group-name $USER_TO_CREATE && \
+aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess  --group-name $USER_TO_CREATE && \
+aws iam create-user --user-name $USER_TO_CREATE && \
+aws iam add-user-to-group --user-name $USER_TO_CREATE --group-name $USER_TO_CREATE && \
+aws iam create-access-key --user-name $USER_TO_CREATE
 ```
 
-This will return an Access Key ID and a Secret Access Key. To add these to your local AWS profiles, use the AWS CLI command `aws configure --profile terraform` and enter the returned values.
+This will return an Access Key ID and a Secret Access Key. To add these to your local AWS profiles, use the AWS CLI command:
 
-![aws-profile.png](https://github.com/terry-richards/jit-developer/assets/141377286/ad96c982-6a01-4efc-9f2f-cfcb56c3e30b "Creating the Terraform profile from the cli.")
+```bash
+aws configure --profile terraform
+```
+
+and enter the returned values.
+
+![aws-profile.png](https://github.com/terry-richards/jit-developer/assets/141377286/ad96c982-6a01-4efc-9f2f-cfcb56c3e30b "Creating the Terraform profile from the cli")
 
 ## Setting Up the Infrastructure
 
@@ -61,7 +67,7 @@ Let's start by setting up our AWS infrastructure. We'll use Terraform for this, 
 
 Start by [cloning the repository](https://github.com/terry-richards/jit-developer) and navigating to the root folder. 
 
-First, we'll set up our environment using the `setenv` file, which contains all the necessary environment variables. Source the file using:
+First, we'll set up our environment using the [setenv](https://github.com/terry-richards/jit-developer/blob/main/setenv) file, which contains all the necessary environment variables. Source the file using:
 ```bash
 source setenv
 ```
@@ -74,51 +80,56 @@ Note the TF_VAR convention.  If you prefer tfvar files have at it. This approach
 
 Now, let's set up our Terraform backend. We will use S3 to hold state and DynamoDB to control concurrency which is a pretty typical configuration.
 
+IMPORTANT: Amazon requires a unique bucket name by region regardless of visibility, so at minimum, you will need to change the ORG variable in the [setenv](https://github.com/terry-richards/jit-developer/blob/main/setenv) file which composes the bucket name (see file for note).
+
 Use the files in `prerequisites/01-aws-terraform-state` to create the state bucket and state lock.
 
-You can run these files by navigating to that directory and executing:
+You can run by navigating to that directory and executing the following two lines:
 ```bash
 source ../../setenv && terraform init
 terraform apply
 ```
 
-![step2.png](https://github.com/terry-richards/jit-developer/assets/141377286/57f396b6-1ab1-4b8e-80da-7cc15a5bcece "S3 bucket and DynamoDB table successfully created.")
+![state.png](https://github.com/terry-richards/jit-developer/assets/141377286/57f396b6-1ab1-4b8e-80da-7cc15a5bcece "S3 bucket and DynamoDB table successfully created.")
 
 **Step 3: Create the VPC and subnet**
 
 Next, we'll create a VPC and subnet for our developer environment. This is an extremely simple example and should not be considered production-grade. Use the files in `prerequisites/02-developer-vpc` to create them.
 
-As before, navigate to the directory and execute:
+As before, navigate to the directory and execute the following two lines, this time passing the newly configured state values to the terraform init process:
+
 ```bash
-source ../../setenv && terraform init
+source ../../setenv && terraform init \
+  -backend-config="bucket=${TF_VAR_terraform_state_bucket_prefix}" \
+  -backend-config="dynamodb_table=${TF_VAR_terraform_state_lock_table}" 
 terraform apply
 ```
 
-![step3.png](https://github.com/terry-richards/jit-developer/assets/141377286/9c5fec99-68a5-4d14-a357-322644a836e2 "VPC and subnet creation")
+![network.png](https://github.com/terry-richards/jit-developer/assets/141377286/9c5fec99-68a5-4d14-a357-322644a836e2 "VPC and subnet creation")
 
-**Step 4: Update the `setenv` file**
+**Step 4: Update environment file and run the main Terraform file**
 
-With our vpc and subnet in place, we'll update the `setenv` file with their IDs. Source the `setenv` file again to update the environment variables.  This is a good time to review the other variables and set as appropriate. 
+With our vpc and subnet in place, we'll update the [setenv](https://github.com/terry-richards/jit-developer/blob/main/setenv) file with their IDs. This is a good time to review the other variables and set as appropriate. 
 
-![step4.png](https://github.com/terry-richards/jit-developer/assets/141377286/474ec069-d2f3-4f83-9ef1-ed4293ce0ed1 "Update your configuration")
-
-**Step 5: Run the main Terraform file**
+![setenv.png](https://github.com/terry-richards/jit-developer/assets/141377286/7f079662-3a97-4a62-8421-3e80d2904768 "Update your configuration")
 
 Finally, it's time to bring everything together. We can now run our main Terraform file, which is responsible for creating our EC2 instance.
 
 Navigate to the root directory of the project and execute:
 ```bash
-source setenv && terraform init
+source setenv && terraform init \
+  -backend-config="bucket=${TF_VAR_terraform_state_bucket_prefix}" \
+  -backend-config="dynamodb_table=${TF_VAR_terraform_state_lock_table}"
 terraform apply
 ```
 
-![step5.png](https://github.com/terry-richards/jit-developer/assets/141377286/b25fb3b7-b557-46e9-818d-5d9c2b307e91 "EC2 instance created!")
+![instance-created.png](https://github.com/terry-richards/jit-developer/assets/141377286/b25fb3b7-b557-46e9-818d-5d9c2b307e91 "EC2 instance created!")
 
 Terraform will automatically fetch the latest LTS version of Ubuntu Server and install it on our EC2 instance.
 
 Once Terraform completes the setup, it will create a configured output directory. This directory will contain the private key file for accessing the instance and a markdown file with detailed instructions on how to connect to the instance via SSH and VNC.
 
-![step5b.png](https://github.com/terry-richards/jit-developer/assets/141377286/5d8ce195-104b-468d-aca6-6f5d4f263b98 "Markdown file containing instance details and connection instructions")
+![instance-details.png](https://github.com/terry-richards/jit-developer/assets/141377286/5d8ce195-104b-468d-aca6-6f5d4f263b98 "Markdown file containing instance details and connection instructions")
 
 ## Bootstrapping the Developer Environment
 
@@ -130,7 +141,8 @@ Our Terraform setup also creates a shutdown cron job that stops the instance nig
 
 Once the bootstrapping process has completed and the system reboots, you will be presented with a ready-to-use development environment:
 
-![desktop.png](https://github.com/terry-richards/jit-developer/assets/141377286/79cbe503-6788-4f38-9351-43d28ee8e778 "Ubuntu 22.04 minimal desktop with developer tools installed.")
+
+![ubuntu-desktop](https://github.com/terry-richards/jit-developer/assets/141377286/66715d74-1669-404b-998b-7c71881927fb "Ubuntu 22.04 minimal desktop with developer tools installed.")
 
 ## Cleanup
 
@@ -141,6 +153,19 @@ source setenv && terraform destroy --auto-approve \
   && cd prerequisites/02-developer-vpc/ && terraform destroy --auto-approve \
   && cd ../../prerequisites/01-aws-terraform-state/ && terraform destroy --auto-approve \
   && cd ../..
+```
+
+And then finishing by logging into the [AWS CloudShell](https://aws.amazon.com/cloudshell/) and executing this one-liner:
+
+```bash
+USER_TO_DELETE='terraform' && \
+for key in $(aws iam list-access-keys --user-name $USER_TO_DELETE --query 'AccessKeyMetadata[*].AccessKeyId' --output text); \
+do aws iam delete-access-key --user-name $USER_TO_DELETE --access-key-id $key; done && \
+aws iam remove-user-from-group --user-name $USER_TO_DELETE --group-name $USER_TO_DELETE && \
+aws iam delete-user --user-name $USER_TO_DELETE && \
+for policy in $(aws iam list-attached-group-policies --group-name $USER_TO_DELETE --query 'AttachedPolicies[*].PolicyArn' --output text); \
+do aws iam detach-group-policy --group-name $USER_TO_DELETE --policy-arn $policy; done && \
+aws iam delete-group --group-name $USER_TO_DELETE
 ```
 
 ## Enhancements

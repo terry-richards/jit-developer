@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "state" {
-  bucket = "tmrsd-terraform-state"
+  bucket = var.terraform_state_bucket_prefix
   force_destroy = true
 }
 
@@ -27,7 +27,7 @@ resource "aws_s3_bucket_public_access_block" "access_block" {
 module "dynamodb_table" {
   source   = "terraform-aws-modules/dynamodb-table/aws"
   version  = "3.3.0"
-  name     = "tmrsd-terraform-lock"
+  name     = var.terraform_state_lock_table
   hash_key = "LockID"
 
   attributes = [

@@ -13,8 +13,7 @@ $ tail -f /var/log/cloud-init-output.log
 ```
 
 Once the 'final' module has completed, the instance will reboot:
-```
-...text
+```text
 Cloud-init v. 23.2.1-0ubuntu0~22.04.1 running 'modules:config' at Fri, 04 Aug 2023 01:53:16 +0000. Up 10.26 seconds.  
 Cloud-init v. 23.2.1-0ubuntu0~22.04.1 running 'modules:final' at Fri, 04 Aug 2023 01:53:17 +0000. Up 11.11 seconds.  
 Cloud-init v. 23.2.1-0ubuntu0~22.04.1 finished at Fri, 04 Aug 2023 01:53:17 +0000. Datasource DataSourceEc2Local.  

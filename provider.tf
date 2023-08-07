@@ -10,8 +10,6 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "tmrsd-terraform-state"
-    dynamodb_table = "tmrsd-terraform-lock"
     key            = "ec2-jit-developer-instance/terraform.tfstate"
   }
 }
